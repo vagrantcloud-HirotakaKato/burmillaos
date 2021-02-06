@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on:  macos-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/cache@v2
+        with:
+          path: packer_cache
+          key:  sha256:c0d50fbd8cec93e1a02dcde1c449a2cafd2048429d00e6ea528c4c955155196a
+      - name: Run packer build
+        env:
+          VERSION:             1.9.1
+          ISO_CHECKSUM:        sha256:c0d50fbd8cec93e1a02dcde1c449a2cafd2048429d00e6ea528c4c955155196a
+          VAGRANT_CLOUD_TOKEN: ${{ secrets.VAGRANT_CLOUD_TOKEN }}
+        run: |
+          set -eux
+          VBoxManage -v
+          packer -v
+          packer build -only=virtualbox-iso \
+            -var version=$VERSION \
+            -var headless=true \
+            -var iso_url=https://github.com/burmilla/os/releases/download/v$VERSION/burmillaos-v$VERSION.iso \
+            -var iso_checksum=$ISO_CHECKSUM \
+            -var box_tag=HirotakaKato/burmillaos \
+            template.json
+          shasum -a 256 box/virtualbox/*.box
