@@ -1,0 +1,57 @@
+{
+  "builders": [
+    {
+      "type": "virtualbox-iso",
+      "iso_url": "{{ user `iso_url` }}",
+      "iso_checksum": "{{ user `iso_checksum` }}",
+      "http_directory": "{{template_dir}}",
+      "disable_shutdown": true,
+      "communicator": "none",
+      "virtualbox_version_file": "",
+      "guest_additions_mode": "disable",
+      "guest_os_type": "Linux26_64",
+      "headless": "{{ user `headless` }}",
+      "cpus": "{{ user `cpus` }}",
+      "memory": "{{ user `memory` }}",
+      "disk_size": "{{user `disk_size`}}",
+      "hard_drive_interface": "sata",
+      "vm_name": "{{user `vm_name`}}",
+      "boot_wait": "{{user `boot_wait`}}",
+      "boot_command": [
+        "sudo ros install -c http://{{.HTTPIP}}:{{.HTTPPort}}/user_config.yml -d /dev/sda -f --no-reboot",
+        " && sudo poweroff<enter>"
+      ]
+    }
+  ],
+  "post-processors": [
+  [
+    {
+      "compression_level": 9,
+      "output": "{{user `box_directory`}}{{.Provider}}/{{user `vm_name`}}{{user `vm_suffix`}}-{{user `version`}}.box",
+      "type": "vagrant",
+      "vagrantfile_template": "{{template_dir}}/vagrantfile.tpl"
+    },
+    {
+      "access_token": "{{user `access_token`}}",
+      "box_tag": "{{user `box_tag`}}",
+      "type": "vagrant-cloud",
+      "version": "{{user `version`}}"
+    }
+  ]
+  ],
+  "variables": {
+    "access_token": "{{env `VAGRANT_CLOUD_TOKEN`}}",
+    "box_tag": "",
+    "boot_wait": "2m",
+    "vm_name": "burmillaos",
+    "vm_suffix": "",
+    "cpus": "2",
+    "memory": "2048",
+    "disk_size": "40960",
+    "iso_url": "",
+    "iso_checksum": "",
+    "box_directory": "box/",
+    "headless": "false",
+    "version": "0.1.0"
+  }
+}
